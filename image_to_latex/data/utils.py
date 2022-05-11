@@ -9,6 +9,8 @@ from PIL import Image
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
+import os
+import chardet
 
 class TqdmUpTo(tqdm):
     """From https://github.com/tqdm/tqdm/blob/master/examples/tqdm_wget.py."""
@@ -200,7 +202,15 @@ class Tokenizer:
 
 def get_all_formulas(filename: Path) -> List[List[str]]:
     """Returns all the formulas in the formula file."""
-    with open(filename) as f:
+    
+    rawdata = open(filename, 'rb').read()
+    result = chardet.detect(rawdata)
+    enc = result['encoding']
+
+    print('enc=',enc)
+
+    with open(filename, encoding=enc) as f:
+
         all_formulas = [formula.strip("\n").split() for formula in f.readlines()]
     return all_formulas
 
@@ -213,7 +223,14 @@ def get_split(
     formulas = []
     with open(filename) as f:
         for line in f:
-            img_name, formula_idx = line.strip("\n").split()
+            print('line=',line)
+            
+            # 여기 split 후에 반환 값이 2개 이상이라 코드를 수정
+            # image_name, formula_idx = line.strip("\n").split()
+            temp = line.strip("\n").split()
+            img_name = temp[1]
+            formula_idx = temp[0]
+
             image_names.append(img_name)
             formulas.append(all_formulas[int(formula_idx)])
     return image_names, formulas

@@ -1,3 +1,6 @@
+import sys
+sys.path.append('.')
+
 from argparse import Namespace
 from typing import List, Optional
 

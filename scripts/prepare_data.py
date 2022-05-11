@@ -1,3 +1,6 @@
+import sys
+sys.path.append('.')
+
 import os
 import subprocess
 from pathlib import Path
@@ -5,13 +8,23 @@ from pathlib import Path
 import image_to_latex.data.utils as utils
 
 
+# METADATA = {
+#     "im2latex_formulas.norm.lst": "http://lstm.seas.harvard.edu/latex/data/im2latex_formulas.norm.lst",
+#     "im2latex_validate_filter.lst": "http://lstm.seas.harvard.edu/latex/data/im2latex_validate_filter.lst",
+#     "im2latex_train_filter.lst": "http://lstm.seas.harvard.edu/latex/data/im2latex_train_filter.lst",
+#     "im2latex_test_filter.lst": "http://lstm.seas.harvard.edu/latex/data/im2latex_test_filter.lst",
+#     "formula_images.tar.gz": "http://lstm.seas.harvard.edu/latex/data/formula_images.tar.gz",
+# }
+
 METADATA = {
-    "im2latex_formulas.norm.lst": "http://lstm.seas.harvard.edu/latex/data/im2latex_formulas.norm.lst",
-    "im2latex_validate_filter.lst": "http://lstm.seas.harvard.edu/latex/data/im2latex_validate_filter.lst",
-    "im2latex_train_filter.lst": "http://lstm.seas.harvard.edu/latex/data/im2latex_train_filter.lst",
-    "im2latex_test_filter.lst": "http://lstm.seas.harvard.edu/latex/data/im2latex_test_filter.lst",
-    "formula_images.tar.gz": "http://lstm.seas.harvard.edu/latex/data/formula_images.tar.gz",
+    "im2latex_formulas.norm.lst": "https://zenodo.org/record/56198/files/im2latex_formulas.lst?download=1",
+    "im2latex_validate_filter.lst": "https://zenodo.org/record/56198/files/im2latex_validate.lst?download=1",
+    "im2latex_train_filter.lst": "https://zenodo.org/record/56198/files/im2latex_train.lst?download=1",
+    "im2latex_test_filter.lst": "https://zenodo.org/record/56198/files/im2latex_test.lst?download=1",
+    "formula_images.tar.gz": "https://zenodo.org/record/56198/files/formula_images.tar.gz?download=1",
 }
+
+
 PROJECT_DIRNAME = Path(__file__).resolve().parents[1]
 DATA_DIRNAME = PROJECT_DIRNAME / "data"
 RAW_IMAGES_DIRNAME = DATA_DIRNAME / "formula_images"
@@ -25,31 +38,31 @@ def main():
     os.chdir(DATA_DIRNAME)
 
     # Download images and grouth truth files
-    for filename, url in METADATA.items():
-        if not Path(filename).is_file():
-            utils.download_url(url, filename)
+    # for filename, url in METADATA.items():
+    #     if not Path(filename).is_file():
+    #         utils.download_url(url, filename)
 
-    # Unzip
-    if not RAW_IMAGES_DIRNAME.exists():
-        RAW_IMAGES_DIRNAME.mkdir(parents=True, exist_ok=True)
-        utils.extract_tar_file("formula_images.tar.gz")
+    # # Unzip
+    # if not RAW_IMAGES_DIRNAME.exists():
+    #     RAW_IMAGES_DIRNAME.mkdir(parents=True, exist_ok=True)
+    #     utils.extract_tar_file("formula_images.tar.gz")
 
-    # Extract regions of interest
-    if not PROCESSED_IMAGES_DIRNAME.exists():
-        PROCESSED_IMAGES_DIRNAME.mkdir(parents=True, exist_ok=True)
-        print("Cropping images...")
-        for image_filename in RAW_IMAGES_DIRNAME.glob("*.png"):
-            cropped_image = utils.crop(image_filename, padding=8)
-            if not cropped_image:
-                continue
-            cropped_image.save(PROCESSED_IMAGES_DIRNAME / image_filename.name)
+    # # Extract regions of interest
+    # if not PROCESSED_IMAGES_DIRNAME.exists():
+    #     PROCESSED_IMAGES_DIRNAME.mkdir(parents=True, exist_ok=True)
+    #     print("Cropping images...")
+    #     for image_filename in RAW_IMAGES_DIRNAME.glob("*.png"):
+    #         cropped_image = utils.crop(image_filename, padding=8)
+    #         if not cropped_image:
+    #             continue
+    #         cropped_image.save(PROCESSED_IMAGES_DIRNAME / image_filename.name)
 
     # Clean the ground truth file
     cleaned_file = "im2latex_formulas.norm.new.lst"
     if not Path(cleaned_file).is_file():
         print("Cleaning data...")
         script = Path(__file__).resolve().parent / "find_and_replace.sh"
-        subprocess.call(["sh", f"{str(script)}", "im2latex_formulas.norm.lst", cleaned_file])
+        subprocess.call(["powershell", f"{str(script)}", "im2latex_formulas.norm.lst", cleaned_file], shell=True)
 
     # Build vocabulary
     if not VOCAB_FILE.is_file():
